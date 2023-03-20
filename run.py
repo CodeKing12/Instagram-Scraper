@@ -17,8 +17,9 @@ if not os.path.isdir("descriptions"):
 
 L = Instaloader()
 
+num_days = 28
 TO = datetime.now()
-FROM = TO - timedelta(days=28)
+FROM = TO - timedelta(days=num_days)
 
 profile = Profile.from_username(L.context, PROFILE) 
 all_posts = profile.get_posts()
@@ -59,4 +60,4 @@ Credits: @{most_liked.profile}
     desc.write(new_description)
     desc.close()
 else:
-    print(f"No videos found in {PROFILE}")
+    print(f"No videos found in {PROFILE} from the last {num_days} days")
