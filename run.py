@@ -35,7 +35,7 @@ for index, post in enumerate(posts_in_date):
 # print(highest_engage)
 # print(most_liked)
 print("-----------------")
-if most_liked != None and most_liked.is_video:
+if most_liked != None:
     new_description = most_liked.caption.strip() + "\n" + f"""
 .
 .
