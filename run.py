@@ -1,4 +1,4 @@
-import random, requests
+import random, os
 from datetime import datetime, timedelta
 from itertools import dropwhile, takewhile
 import wget
@@ -8,7 +8,12 @@ from instaloader import Instaloader, Profile
 input_profiles = ["bestkittenvibes", "kittynoodlez", "catieepieee", "cutecatsvibeez", "kittenscuddlez", "catversum", "prioritykitty", "dailydoseeofcats"]
 
 PROFILE = random.choice(input_profiles)
-# PROFILE = "bestkittenvibes"
+# PROFILE = "catversum"
+
+if not os.path.isdir("videos"):
+    os.mkdir("videos")
+if not os.path.isdir("descriptions"):
+    os.mkdir("descriptions")
 
 L = Instaloader()
 
@@ -28,12 +33,6 @@ for index, post in enumerate(posts_in_date):
         highest_engage = total_engagement
         most_liked = post
 
-
-
-# print(PROFILE)
-# print(posts_in_date)
-# print(highest_engage)
-# print(most_liked)
 print("-----------------")
 if most_liked != None:
     new_description = most_liked.caption.strip() + "\n" + f"""
@@ -49,8 +48,6 @@ Credits: @{most_liked.profile}
     file_name = most_liked.profile + "_" + str(most_liked.date_utc).replace(" ", "-")
     
     print("Downloading Video...")
-    # video = requests.get(most_liked.video_url)
-    # open(f"videos/{file_name}.mp4", "wb").write(video.content)
     video = wget.download(most_liked.video_url, f"videos/{file_name}.mp4")
     print("")
 
@@ -62,4 +59,4 @@ Credits: @{most_liked.profile}
     desc.write(new_description)
     desc.close()
 else:
-    print("No videos found")
+    print(f"No videos found in {PROFILE}")
