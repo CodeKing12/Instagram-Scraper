@@ -1,14 +1,15 @@
 import random, os
 from datetime import datetime, timedelta
 from itertools import dropwhile, takewhile
-import wget
-
+import wget, re, json
 from instaloader import Instaloader, Profile
 
-input_profiles = ["bestkittenvibes", "kittynoodlez", "catieepieee", "cutecatsvibeez", "kittenscuddlez", "catversum", "prioritykitty", "dailydoseeofcats"]
+with open("settings.json") as settings_file:
+    settings = json.loads(settings_file.read())
 
+input_profiles = settings["profiles"]
 PROFILE = random.choice(input_profiles)
-# PROFILE = "catversum"
+# PROFILE = "prioritykitty" #bestkittenvibes #catversum
 
 if not os.path.isdir("videos"):
     os.mkdir("videos")
@@ -16,8 +17,9 @@ if not os.path.isdir("descriptions"):
     os.mkdir("descriptions")
 
 L = Instaloader()
+L.login(settings["username"], settings["password"])
 
-num_days = 28
+num_days = settings["days"]
 TO = datetime.now()
 FROM = TO - timedelta(days=num_days)
 
@@ -36,14 +38,20 @@ for index, post in enumerate(posts_in_date):
 
 print("-----------------")
 if most_liked != None:
-    new_description = most_liked.caption.strip() + "\n" + f"""
+    edited_caption = most_liked.caption
+    hashtag_list = ["#" + hashtag for hashtag in most_liked.caption_hashtags]
+    for hashtag in sorted(hashtag_list, key=lambda tag: len(tag), reverse=True):
+        edited_caption = edited_caption.replace(hashtag, "")
+    edited_caption = re.sub("\n+", "\n", edited_caption)
+    edited_caption = re.sub(" +", " ", edited_caption)
+    edited_caption = edited_caption.strip()
+    new_description = edited_caption + f"""
 .
 .
 .
 Credits: @{most_liked.profile}
 .
-#cat #catsofinstagram #cats #catlover #instacat #catfood #catloaf #catchoftheday #cateringmurah #catsinstagram #catalina #cats_of_the_world #catlife🐾 #catto #catillustration #catperson #catfriends #hkcat #catselfies #caty #catholicblogger #cutecat #sleepingcat #catair"""
-    new_description 
+#cat #catsofinstagram #cats #catlover #instacat #catfood #catloaf #catchoftheday #cateringmurah #catsinstagram #catalina #cats_of_the_world #catlife🐾 #catto #catillustration #catperson #catfriends #hkcat #catselfies #caty #catholicblogger #cutecat #sleepingcat #catair {" ".join(hashtag_list)}"""
     print(new_description)
     print("-----------------------------------------")
     file_name = most_liked.profile + "_" + str(most_liked.date_utc).replace(" ", "-")
@@ -60,4 +68,4 @@ Credits: @{most_liked.profile}
     desc.write(new_description)
     desc.close()
 else:
-    print(f"No videos found in {PROFILE} from the last {num_days} days")
+    print(f"No videos found in @{PROFILE} from the last {num_days} days")
