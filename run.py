@@ -4,14 +4,6 @@ from itertools import dropwhile, takewhile
 import wget, re, json
 from instaloader import Instaloader, Profile
 
-# Load the program settings and database from the settings.json and database.json files respectively
-settings = json.loads(open("settings.json").read())
-database = json.loads(open("database.json").read())
-
-# Select a random profile from the list of profiles in the program settings
-input_profiles = settings["profiles"]
-PROFILE = random.choice(input_profiles)
-PROFILE = "prioritykitty" #bestkittenvibes #catversum
 
 # Make the directories for saving the descriptions and the content of each video
 if not os.path.isdir("videos"):
@@ -22,6 +14,29 @@ if not os.path.isfile("database.json"):
     open("database.json", "x")
 if not os.path.isfile("settings.json"):
     open("settings.json", "x").write('{}')
+
+
+# Load the program settings and database from the settings.json and database.json files respectively
+all_settings = json.loads(open("settings.json").read())
+
+page_exists = False
+while not page_exists:
+    page = input("What page will you use today? ")
+    if page in all_settings.keys():
+        page_exists = True
+        settings = all_settings[page]
+        print("\nPage found.\n")
+    else:
+        print("\n-----------------------------------------")
+        print("Page not found in your settings file")
+        print("-----------------------------------------\n")
+
+database = json.loads(open("database.json").read())
+
+# Select a random profile from the list of profiles in the program settings
+input_profiles = settings["profiles"]
+PROFILE = random.choice(input_profiles)
+# PROFILE = "prioritykitty" #bestkittenvibes #catversum
 
 # Initiate the Instaloader class and login to the instagram account specified in the settings
 L = Instaloader()
