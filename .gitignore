@@ -2,3 +2,5 @@ env/
 videos/
 descriptions/
 prioritykitty/
+database.json
+settings.json

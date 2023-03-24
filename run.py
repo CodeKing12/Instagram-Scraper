@@ -9,8 +9,8 @@ settings = json.loads(open("settings.json").read())
 database = json.loads(open("database.json").read())
 
 # Select a random profile from the list of profiles in the program settings
-# input_profiles = settings["profiles"]
-# PROFILE = random.choice(input_profiles)
+input_profiles = settings["profiles"]
+PROFILE = random.choice(input_profiles)
 PROFILE = "prioritykitty" #bestkittenvibes #catversum
 
 # Make the directories for saving the descriptions and the content of each video
@@ -20,6 +20,8 @@ if not os.path.isdir("descriptions"):
     os.mkdir("descriptions")
 if not os.path.isfile("database.json"):
     open("database.json", "x")
+if not os.path.isfile("settings.json"):
+    open("settings.json", "x").write('{}')
 
 # Initiate the Instaloader class and login to the instagram account specified in the settings
 L = Instaloader()
@@ -58,22 +60,26 @@ print("-----------------")
 # Download the video and description is there is a video made in the time range specified in FROM and TO
 if most_liked != None:
     # Remove and store all hashtags from the original caption
-    edited_caption = most_liked.caption
-    hashtag_list = ["#" + hashtag for hashtag in most_liked.caption_hashtags]
-    for hashtag in sorted(hashtag_list, key=lambda tag: len(tag), reverse=True):
-        edited_caption = edited_caption.replace(hashtag, "")
-    # Remove all unnecessary spaces and newlines from the caption
-    edited_caption = re.sub("\n+", "\n", edited_caption)
-    edited_caption = re.sub(" +", " ", edited_caption)
-    edited_caption = edited_caption.strip()
-    # Append the specified string to the edited caption
-    new_description = edited_caption + f"""
+    if most_liked.caption != None:
+        edited_caption = most_liked.caption
+        hashtag_list = ["#" + hashtag for hashtag in most_liked.caption_hashtags]
+        for hashtag in sorted(hashtag_list, key=lambda tag: len(tag), reverse=True):
+            edited_caption = edited_caption.replace(hashtag, "")
+        # Convert the edited caption to a string, then remove all unnecessary spaces and newlines from the caption
+        edited_caption = str(edited_caption)
+        edited_caption = re.sub("\n+", "\n", edited_caption)
+        edited_caption = re.sub(" +", " ", edited_caption)
+        edited_caption = edited_caption.strip()
+        # Append the specified string to the edited caption
+        new_description = edited_caption + f"""
 .
 .
 .
 Credits: @{most_liked.profile}
 .
 #cat #catsofinstagram #cats #catlover #instacat #catfood #catloaf #catchoftheday #cateringmurah #catsinstagram #catalina #cats_of_the_world #catlife🐾 #catto #catillustration #catperson #catfriends #hkcat #catselfies #caty #catholicblogger #cutecat #sleepingcat #catair {" ".join(hashtag_list)}"""
+    else:
+        new_description = f"""Credits: @{most_liked.profile}\n.\n#cat #catsofinstagram #cats #catlover #instacat #catfood #catloaf #catchoftheday #cateringmurah #catsinstagram #catalina #cats_of_the_world #catlife🐾 #catto #catillustration #catperson #catfriends #hkcat #catselfies #caty #catholicblogger #cutecat #sleepingcat #catair"""
     print(new_description)
     print("-----------------------------------------")
     # Create a file name by combining the profile name and the date of the most liked vide
