@@ -18,6 +18,8 @@ if not os.path.isdir("videos"):
     os.mkdir("videos")
 if not os.path.isdir("descriptions"):
     os.mkdir("descriptions")
+if not os.path.isfile("database.json"):
+    open("database.json", "x")
 
 # Initiate the Instaloader class and login to the instagram account specified in the settings
 L = Instaloader()
