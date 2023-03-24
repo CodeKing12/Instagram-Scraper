@@ -4,30 +4,46 @@ from itertools import dropwhile, takewhile
 import wget, re, json
 from instaloader import Instaloader, Profile
 
-with open("settings.json") as settings_file:
-    settings = json.loads(settings_file.read())
+# Load the program settings and database from the settings.json and database.json files respectively
+settings = json.loads(open("settings.json").read())
+database = json.loads(open("database.json").read())
 
-input_profiles = settings["profiles"]
-PROFILE = random.choice(input_profiles)
-# PROFILE = "prioritykitty" #bestkittenvibes #catversum
+# Select a random profile from the list of profiles in the program settings
+# input_profiles = settings["profiles"]
+# PROFILE = random.choice(input_profiles)
+PROFILE = "prioritykitty" #bestkittenvibes #catversum
 
+# Make the directories for saving the descriptions and the content of each video
 if not os.path.isdir("videos"):
     os.mkdir("videos")
 if not os.path.isdir("descriptions"):
     os.mkdir("descriptions")
 
+# Initiate the Instaloader class and login to the instagram account specified in the settings
 L = Instaloader()
 L.login(settings["username"], settings["password"])
 
+# Specify the range of dates within which videos will be scraped
 num_days = settings["days"]
 TO = datetime.now()
 FROM = TO - timedelta(days=num_days)
 
+# Scrape all the posts from the randomly gotten PROFILE and filter out the dates made between the FROM and TO dates specified above
 profile = Profile.from_username(L.context, PROFILE) 
 all_posts = profile.get_posts()
 posts_in_date = [post for post in takewhile(lambda p: p.date > FROM, dropwhile(lambda p: p.date > TO, all_posts))]
-engagements = [post.comments + post.likes for post in posts_in_date]
 
+# Get all previously scrapped posts for a user in the database
+try:
+    scraped_posts = database[PROFILE]
+except KeyError:
+    database[PROFILE] = []
+    scraped_posts = database[PROFILE]
+# Remove all previously scrapped posts from the list of posts in date by making 
+# both lists to become sets, subtracting the duplicates and converting the resulting set to a list
+posts_in_date = [post for post in posts_in_date if post.mediaid not in scraped_posts]
+
+# Get the most engaged post (by adding its comments and likes) in the filtered list of posts
 highest_engage = 0
 most_liked = None
 for index, post in enumerate(posts_in_date):
@@ -37,14 +53,18 @@ for index, post in enumerate(posts_in_date):
         most_liked = post
 
 print("-----------------")
+# Download the video and description is there is a video made in the time range specified in FROM and TO
 if most_liked != None:
+    # Remove and store all hashtags from the original caption
     edited_caption = most_liked.caption
     hashtag_list = ["#" + hashtag for hashtag in most_liked.caption_hashtags]
     for hashtag in sorted(hashtag_list, key=lambda tag: len(tag), reverse=True):
         edited_caption = edited_caption.replace(hashtag, "")
+    # Remove all unnecessary spaces and newlines from the caption
     edited_caption = re.sub("\n+", "\n", edited_caption)
     edited_caption = re.sub(" +", " ", edited_caption)
     edited_caption = edited_caption.strip()
+    # Append the specified string to the edited caption
     new_description = edited_caption + f"""
 .
 .
@@ -54,12 +74,15 @@ Credits: @{most_liked.profile}
 #cat #catsofinstagram #cats #catlover #instacat #catfood #catloaf #catchoftheday #cateringmurah #catsinstagram #catalina #cats_of_the_world #catlife🐾 #catto #catillustration #catperson #catfriends #hkcat #catselfies #caty #catholicblogger #cutecat #sleepingcat #catair {" ".join(hashtag_list)}"""
     print(new_description)
     print("-----------------------------------------")
+    # Create a file name by combining the profile name and the date of the most liked vide
     file_name = most_liked.profile + "_" + str(most_liked.date_utc).replace(" ", "-")
     
     print("Downloading Video...")
+    # Download the most liked video
     video = wget.download(most_liked.video_url, f"videos/{file_name}.mp4")
     print("")
 
+    # Open the descriptions file with the specified file name, insert the caption there and close the file
     try:
         desc = open(f"descriptions/{file_name}.txt", "x")
     except FileExistsError:
@@ -67,5 +90,11 @@ Credits: @{most_liked.profile}
 
     desc.write(new_description)
     desc.close()
+
+    # Add the scraped post to the database
+    database[PROFILE].append(most_liked.mediaid)
+    open("database.json", "w").write(json.dumps(database))
+# Inform the user if there are no videos found in the specified time range
 else:
     print(f"No videos found in @{PROFILE} from the last {num_days} days")
+    print("-----------------------------------------")
