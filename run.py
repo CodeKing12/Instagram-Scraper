@@ -92,7 +92,7 @@ if most_liked != None:
 .
 Credits: @{most_liked.profile}
 .
-#cat #catsofinstagram #cats #catlover #instacat #catfood #catloaf #catchoftheday #cateringmurah #catsinstagram #catalina #cats_of_the_world #catlife🐾 #catto #catillustration #catperson #catfriends #hkcat #catselfies #caty #catholicblogger #cutecat #sleepingcat #catair {" ".join(hashtag_list)}"""
+{settings["hashtags"]} {" ".join(hashtag_list)}"""
     else:
         new_description = f"""Credits: @{most_liked.profile}\n.\n#cat #catsofinstagram #cats #catlover #instacat #catfood #catloaf #catchoftheday #cateringmurah #catsinstagram #catalina #cats_of_the_world #catlife🐾 #catto #catillustration #catperson #catfriends #hkcat #catselfies #caty #catholicblogger #cutecat #sleepingcat #catair"""
     print(new_description)
