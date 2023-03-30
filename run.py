@@ -22,9 +22,11 @@ all_settings = json.loads(open("settings.json").read())
 page_exists = False
 while not page_exists:
     page = input("What page will you use today? ")
-    if page in all_settings.keys():
+    if page in all_settings['pages'].keys():
         page_exists = True
-        settings = all_settings[page]
+        settings = all_settings['pages'][page]
+        username = all_settings["username"]
+        password = all_settings["password"]
         print("\nPage found.\n")
     else:
         print("\n-----------------------------------------")
@@ -40,7 +42,7 @@ PROFILE = random.choice(input_profiles)
 
 # Initiate the Instaloader class and login to the instagram account specified in the settings
 L = Instaloader()
-L.login(settings["username"], settings["password"])
+L.login(username, password)
 
 # Specify the range of dates within which videos will be scraped
 num_days = settings["days"]
