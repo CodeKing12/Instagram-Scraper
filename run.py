@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from itertools import dropwhile, takewhile
 import wget, re, json
 from instaloader import Instaloader, Profile
-
+from import_login.firefox_cookies import login_to_session
 
 # Make the directories for saving the descriptions and the content of each video
 if not os.path.isdir("videos"):
@@ -42,7 +42,7 @@ PROFILE = random.choice(input_profiles)
 
 # Initiate the Instaloader class and login to the instagram account specified in the settings
 L = Instaloader()
-L.login(username, password)
+login_to_session()
 
 # Specify the range of dates within which videos will be scraped
 num_days = settings["days"]
