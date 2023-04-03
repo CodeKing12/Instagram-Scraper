@@ -2,7 +2,7 @@ import random, os
 from datetime import datetime, timedelta
 from itertools import dropwhile, takewhile
 import wget, re, json
-from instaloader import Instaloader, Profile
+from instaloader import Instaloader, Profile, Post
 from import_login.firefox_cookies import login_to_session
 
 # Make the directories for saving the descriptions and the content of each video
@@ -20,18 +20,19 @@ if not os.path.isfile("settings.json"):
 all_settings = json.loads(open("settings.json").read())
 
 page_exists = False
-while not page_exists:
-    page = input("What page will you use today? ")
-    if page in all_settings['pages'].keys():
-        page_exists = True
-        settings = all_settings['pages'][page]
-        username = all_settings["username"]
-        password = all_settings["password"]
-        print("\nPage found.\n")
-    else:
-        print("\n-----------------------------------------")
-        print("Page not found in your settings file")
-        print("-----------------------------------------\n")
+# while not page_exists:
+#     page = input("What page will you use today? ")
+page = "page1"
+if page in all_settings['pages'].keys():
+    page_exists = True
+    settings = all_settings['pages'][page]
+    username = all_settings["username"]
+    password = all_settings["password"]
+    print("\nPage found.\n")
+else:
+    print("\n-----------------------------------------")
+    print("Page not found in your settings file")
+    print("-----------------------------------------\n")
 
 database = json.loads(open("database.json").read())
 
@@ -44,36 +45,8 @@ PROFILE = random.choice(input_profiles)
 L = Instaloader()
 login_to_session()
 
-# Specify the range of dates within which videos will be scraped
-num_days = settings["days"]
-TO = datetime.now()
-FROM = TO - timedelta(days=num_days)
+most_liked = Post.from_shortcode(context=L.context, shortcode="CqkTgelo28-")
 
-# Scrape all the posts from the randomly gotten PROFILE and filter out the dates made between the FROM and TO dates specified above
-profile = Profile.from_username(L.context, PROFILE) 
-all_posts = profile.get_posts()
-unfiltered_posts_in_date = [post for post in takewhile(lambda p: p.date > FROM, dropwhile(lambda p: p.date > TO, all_posts))]
-
-# Get all previously scrapped posts for a user in the database
-try:
-    scraped_posts = database[PROFILE]
-except KeyError:
-    database[PROFILE] = []
-    scraped_posts = database[PROFILE]
-# Remove all previously scrapped posts from the list of posts in date by making 
-# both lists to become sets, subtracting the duplicates and converting the resulting set to a list
-posts_in_date = [post for post in unfiltered_posts_in_date if post.mediaid not in scraped_posts]
-
-# Get the most engaged post (by adding its comments and likes) in the filtered list of posts
-highest_engage = 0
-most_liked = None
-for index, post in enumerate(posts_in_date):
-    total_engagement = post.comments + post.likes
-    if total_engagement > highest_engage:
-        highest_engage = total_engagement
-        most_liked = post
-
-print("-----------------")
 # Download the video and description is there is a video made in the time range specified in FROM and TO
 if most_liked != None:
     # Remove and store all hashtags from the original caption
@@ -104,7 +77,15 @@ Credits: @{most_liked.profile}
     
     print("Downloading Video...")
     # Download the most liked video
-    video = wget.download(most_liked.video_url, f"videos/{file_name}.mp4")
+    print(most_liked.video_url)
+    print(most_liked.mediacount)
+    if most_liked.mediacount > 1:
+        file_index = 1
+        for node in most_liked.get_sidecar_nodes():
+            wget.download(node.display_url, f"videos/{file_name}_{file_index}.mp4")
+            file_index += 1
+    else:
+        video = wget.download(most_liked.video_url, f"videos/{file_name}.mp4")
     print("")
 
     # Open the descriptions file with the specified file name, insert the caption there and close the file
@@ -121,10 +102,7 @@ Credits: @{most_liked.profile}
     open("database.json", "w").write(json.dumps(database))
 # Inform the user if there are no videos found in the specified time range
 else:
-    if len(unfiltered_posts_in_date) > 0 and len(posts_in_date) == 0:
-        print(f"All videos in @{PROFILE} from the last {num_days} days have been scrapped. No new ones to scrape.")
-    else:
-        print(f"No videos found in @{PROFILE} from the last {num_days} days")
+    print(f"No videos found in @{PROFILE} from the last 28 days")
     print("-----------------------------------------")
 
     # "profiles": ["kittynoodlez", "catieepieee", "cutecatsvibeez", "kittenscuddlez", "prioritykitty", "dailydoseeofcats", "bestkittenvibes", "catversum"],
