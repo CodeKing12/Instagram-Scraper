@@ -104,7 +104,13 @@ Credits: @{most_liked.profile}
     
     print("Downloading Video...")
     # Download the most liked video
-    video = wget.download(most_liked.video_url, f"videos/{file_name}.mp4")
+    if most_liked.mediacount > 1:
+        file_index = 1
+        for node in most_liked.get_sidecar_nodes():
+            wget.download(node.display_url, f"videos/{file_name}_{file_index}.mp4")
+            file_index += 1
+    else:
+        video = wget.download(most_liked.video_url, f"videos/{file_name}.mp4")
     print("")
 
     # Open the descriptions file with the specified file name, insert the caption there and close the file
