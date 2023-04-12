@@ -37,8 +37,8 @@ database = json.loads(open("database.json").read())
 
 # Select a random profile from the list of profiles in the program settings
 input_profiles = settings["profiles"]
-PROFILE = random.choice(input_profiles)
-# PROFILE = "prioritykitty" #bestkittenvibes #catversum
+# PROFILE = random.choice(input_profiles)
+PROFILE = "memez.ng" #prioritykitty #bestkittenvibes #catversum
 
 # Initiate the Instaloader class and login to the instagram account specified in the settings
 L = Instaloader()
@@ -108,10 +108,24 @@ Credits: @{most_liked.profile}
     if most_liked.mediacount > 1:
         file_index = 1
         for node in most_liked.get_sidecar_nodes():
-            wget.download(node.display_url, f"videos/{file_name}_{file_index}.mp4")
+            # print('**********************')
+            # print(node)
+            if node.is_video:
+                file_extension = wget.detect_filename(node.video_url).split('.')[-1]
+                wget.download(node.video_url, f"videos/{file_name}_{file_index}.{file_extension}")
+            else:
+                file_extension = wget.detect_filename(node.display_url).split('.')[-1]
+                wget.download(node.display_url, f"videos/{file_name}_{file_index}.{file_extension}")
+            # print("\n" + file_extension)
+            # print('**********************')
             file_index += 1
     else:
-        video = wget.download(most_liked.video_url, f"videos/{file_name}.mp4")
+        if most_liked.is_video:
+            file_extension = wget.detect_filename(most_liked.video_url).split('.')[-1]
+            wget.download(most_liked.video_url, f"videos/{file_name}.{file_extension}")
+        else:
+            file_extension = wget.detect_filename(most_liked.url).split('.')[-1]
+            wget.download(most_liked.url, f"videos/{file_name}.{file_extension}")
     print("")
 
     # Open the descriptions file with the specified file name, insert the caption there and close the file
