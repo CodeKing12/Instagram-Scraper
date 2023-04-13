@@ -37,8 +37,8 @@ database = json.loads(open("database.json").read())
 
 # Select a random profile from the list of profiles in the program settings
 input_profiles = settings["profiles"]
-# PROFILE = random.choice(input_profiles)
-PROFILE = "memez.ng" #prioritykitty #bestkittenvibes #catversum
+PROFILE = random.choice(input_profiles)
+# PROFILE = "memez.ng" #prioritykitty #bestkittenvibes #catversum
 
 # Initiate the Instaloader class and login to the instagram account specified in the settings
 L = Instaloader()
