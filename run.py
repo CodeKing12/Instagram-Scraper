@@ -43,7 +43,8 @@ PROFILE = "memez.ng" #prioritykitty #bestkittenvibes #catversum
 # Initiate the Instaloader class and login to the instagram account specified in the settings
 L = Instaloader()
 # login_to_session()
-L.login(username, password)
+L.load_session_from_file(username)
+# L.login(username, password)
 
 # Specify the range of dates within which videos will be scraped
 num_days = settings["days"]
