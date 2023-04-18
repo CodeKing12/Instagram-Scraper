@@ -1,6 +1,4 @@
 import random, os
-from datetime import datetime, timedelta
-from itertools import dropwhile, takewhile
 import wget, re, json
 from instaloader import Instaloader, Profile
 # from import_login.firefox_cookies import login_to_session
@@ -46,15 +44,9 @@ L = Instaloader()
 L.load_session_from_file(username)
 # L.login(username, password)
 
-# Specify the range of dates within which videos will be scraped
-num_days = settings["days"]
-TO = datetime.now()
-FROM = TO - timedelta(days=num_days)
-
 # Scrape all the posts from the randomly gotten PROFILE and filter out the dates made between the FROM and TO dates specified above
 profile = Profile.from_username(L.context, PROFILE) 
 all_posts = profile.get_posts()
-unfiltered_posts_in_date = [post for post in takewhile(lambda p: p.date > FROM, dropwhile(lambda p: p.date > TO, all_posts))]
 
 # Get all previously scrapped posts for a user in the database
 try:
@@ -64,7 +56,7 @@ except KeyError:
     scraped_posts = database[PROFILE]
 # Remove all previously scrapped posts from the list of posts in date by making 
 # both lists to become sets, subtracting the duplicates and converting the resulting set to a list
-posts_in_date = [post for post in unfiltered_posts_in_date if post.mediaid not in scraped_posts]
+posts_in_date = [post for post in all_posts if post.mediaid not in scraped_posts]
 
 # Get the most engaged post (by adding its comments and likes) in the filtered list of posts
 highest_engage = 0
@@ -143,10 +135,10 @@ Credits: @{most_liked.profile}
     open("database.json", "w").write(json.dumps(database))
 # Inform the user if there are no videos found in the specified time range
 else:
-    if len(unfiltered_posts_in_date) > 0 and len(posts_in_date) == 0:
-        print(f"All videos in @{PROFILE} from the last {num_days} days have been scrapped. No new ones to scrape.")
+    if len(all_posts) > 0 and len(posts_in_date) == 0:
+        print(f"All videos in @{PROFILE} have been scrapped. No new ones to scrape.")
     else:
-        print(f"No videos found in @{PROFILE} from the last {num_days} days")
+        print(f"No videos found in @{PROFILE}")
     print("-----------------------------------------")
 
     # "profiles": ["kittynoodlez", "catieepieee", "cutecatsvibeez", "kittenscuddlez", "prioritykitty", "dailydoseeofcats", "bestkittenvibes", "catversum"],
