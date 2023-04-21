@@ -70,15 +70,11 @@ def scrape_profile(settings):
             edited_caption = re.sub(" +", " ", edited_caption)
             edited_caption = edited_caption.strip()
             # Append the specified string to the edited caption
-            new_description = edited_caption + f"""
-    .
-    .
-    .
-    Credits: @{most_liked.profile}
-    .
-    {settings["hashtags"]} {" ".join(hashtag_list)}"""
+            new_description = edited_caption + f"""\n.\n.\n.
+Credits: @{most_liked.profile}\n.
+{settings["hashtags"]} {" ".join(hashtag_list)}"""
         else:
-            new_description = f"""Credits: @{most_liked.profile}\n.\n#cat #catsofinstagram #cats #catlover #instacat #catfood #catloaf #catchoftheday #cateringmurah #catsinstagram #catalina #cats_of_the_world #catlife🐾 #catto #catillustration #catperson #catfriends #hkcat #catselfies #caty #catholicblogger #cutecat #sleepingcat #catair"""
+            new_description = f"""Credits: @{most_liked.profile}\n.\n{settings["hashtags"]}"""
         print(new_description)
         print("-----------------------------------------")
         # Create a file name by combining the profile name and the date of the most liked vide
@@ -94,9 +90,6 @@ def scrape_profile(settings):
                 if node.is_video:
                     file_extension = wget.detect_filename(node.video_url).split('.')[-1]
                     wget.download(node.video_url, f"videos/{file_name}_{file_index}.{file_extension}")
-                else:
-                    file_extension = wget.detect_filename(node.display_url).split('.')[-1]
-                    wget.download(node.display_url, f"videos/{file_name}_{file_index}.{file_extension}")
                 # print("\n" + file_extension)
                 # print('**********************')
                 file_index += 1
@@ -104,9 +97,9 @@ def scrape_profile(settings):
             if most_liked.is_video:
                 file_extension = wget.detect_filename(most_liked.video_url).split('.')[-1]
                 wget.download(most_liked.video_url, f"videos/{file_name}.{file_extension}")
-            else:
-                file_extension = wget.detect_filename(most_liked.url).split('.')[-1]
-                wget.download(most_liked.url, f"videos/{file_name}.{file_extension}")
+            # else:
+            #     file_extension = wget.detect_filename(most_liked.url).split('.')[-1]
+            #     wget.download(most_liked.url, f"videos/{file_name}.{file_extension}")
         print("")
 
         # Open the descriptions file with the specified file name, insert the caption there and close the file
